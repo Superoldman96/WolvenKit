@@ -266,7 +266,6 @@ public class CvmMaterialTools
                 externalMaterialIdx += 1;
             }
 
-            t.Index = (CUInt16)i;
             mesh.MaterialEntries.Add(t);
         }
 
@@ -677,7 +676,7 @@ public class CvmMaterialTools
             Name = newName, IsLocalInstance = isLocalInstance, Index = (CUInt16)lastIndex + 1
         });
 
-        switch (materialEntries.ResolvedData)
+        switch (cvm.ResolvedData)
         {
             case CArray<CMaterialInstance> matInstances:
                 matInstances.Add(new CMaterialInstance());

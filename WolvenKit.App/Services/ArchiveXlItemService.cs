@@ -35,7 +35,7 @@ public class ArchiveXlClothingItem
 
     public List<ArchiveXlHidingTags> HidingTags { get; init; } = [];
 
-    public string ItemFileName => $"{ItemName.ToFileName().ToLower().Replace(" ", "_")}";
+    public string ItemFileName => ItemName.ToArchiveFileName();
 
     /// <summary>
     /// modderName/equipment/slot/projectName
@@ -211,10 +211,10 @@ public partial class ArchiveXlItemService
     {
         if (!string.IsNullOrEmpty(_projectManager.ActiveProject?.Author))
         {
-            return _projectManager.ActiveProject.Author.ToFileName().Replace(" ", "_");
+            return _projectManager.ActiveProject.Author.ToArchiveFileName().Replace(" ", "_");
         }
 
-        return (_settingsManager.ModderName ?? "wolvenkit_user").ToFileName().Replace(" ", "_");
+        return (_settingsManager.ModderName ?? "wolvenkit_user").ToArchiveFileName().Replace(" ", "_");
     }
 
     public void CreateEquipmentItem(ArchiveXlClothingItem clothingItemData)
@@ -271,7 +271,7 @@ public partial class ArchiveXlItemService
             "equipment",
             clothingItemData.Slot.ToString().Replace("outer_", "").Replace("inner_", ""),
             clothingItemData.ItemFileName
-        ).ToFilePath();
+        ).ToArchiveFilePath();
 
         // Control files go into the folder of any existing csv file in the project, or the default path
         clothingItemData.ControlFilesRelPath =
@@ -280,29 +280,29 @@ public partial class ArchiveXlItemService
                 GetModderName(),
                 activeProject.ModName,
                 clothingItemData.ItemFileName
-            ).ToFilePath();
+            ).ToArchiveFilePath();
 
 
         // Now write paths into the item data
         clothingItemData.RootEntityPath = Path.Combine(clothingItemData.ControlFilesRelPath,
-            $"_root_entity.ent").ToFilePath();
+            $"_root_entity.ent").ToArchiveFilePath();
         if (activeProject.ModFiles.FirstOrDefault(f => f.EndsWith("_root_entity.ent")) is string existingRoot)
         {
             clothingItemData.RootEntityPath = existingRoot;
         }
 
         clothingItemData.AppFilePath = Path.Combine(clothingItemData.ControlFilesRelPath,
-            $"_application.app").ToFilePath();
+            $"_application.app").ToArchiveFilePath();
         if (activeProject.ModFiles.FirstOrDefault(f => f.EndsWith("_application.app")) is string existingApp)
         {
             clothingItemData.AppFilePath = existingApp;
         }
 
         clothingItemData.MeshEntityPath = Path.Combine(clothingItemData.ControlFilesRelPath,
-            $"_{clothingItemData.ItemFileName}_mesh_entity.ent").ToFilePath();
+            $"_{clothingItemData.ItemFileName}_mesh_entity.ent").ToArchiveFilePath();
 
         clothingItemData.InkatlasPath = Path.Combine(clothingItemData.ControlFilesRelPath,
-            $"{clothingItemData.ItemFileName}_icons.inkatlas").ToFilePath();
+            $"{clothingItemData.ItemFileName}_icons.inkatlas").ToArchiveFilePath();
 
         // If we have more than one .yaml file under resources, create a new one, otherwise append
         var yamlFiles = activeProject.ResourceFiles.Where(f => f.HasFileExtension("yaml")).ToList();
@@ -316,7 +316,7 @@ public partial class ArchiveXlItemService
                 activeProject.GetRelativeResourceTweakDirectory(),
                 GetModderName(),
                 $"{activeProject.ModName}.yaml"
-            ).ToFilePath();
+            ).ToOsFilePath();
         }
 
         if (activeProject.ModFiles.Where(p => p.HasFileExtension(".json")).ToList() is { Count: 1 } list)
@@ -330,14 +330,8 @@ public partial class ArchiveXlItemService
         }
 
         var xlFiles = activeProject.ResourceFiles.Where(f => f.HasFileExtension("xl")).ToList();
-        if (xlFiles.Count == 1)
-        {
-            clothingItemData.XlFilePath = xlFiles.First();
-        }
-        else
-        {
-            clothingItemData.XlFilePath = Path.Join($"{activeProject.ModName}.archive.xl").ToFilePath();
-        }
+        clothingItemData.XlFilePath =
+            xlFiles.Count == 1 ? xlFiles.First() : $"{activeProject.ModName.ToArchiveFileName()}.archive.xl";
 
         var relativeFactoryPath = Path.Combine(clothingItemData.ControlFilesRelPath, "factory.csv");
         if (activeProject.ModFiles.Where(f => f.HasFileExtension("csv")).ToList() is { Count: 1 } l)
@@ -459,7 +453,7 @@ public partial class ArchiveXlItemService
             if (appearanceNames.Count > 0)
             {
                 clothingItemData.Variants.Clear();
-                clothingItemData.Variants.AddRange(appearanceNames.Select(s => s.ToFileName()));
+                clothingItemData.Variants.AddRange(appearanceNames.Select(s => s.ToArchiveFileName()));
             }
         }
 
@@ -481,7 +475,7 @@ public partial class ArchiveXlItemService
         if (secondaryAppearances.Count > 0)
         {
             clothingItemData.SecondaryVariants.Clear();
-            clothingItemData.SecondaryVariants.AddRange(secondaryAppearances.Select(s => s.ToFileName()));
+            clothingItemData.SecondaryVariants.AddRange(secondaryAppearances.Select(s => s.ToArchiveFileName()));
         }
 
         if (clothingItemData.SecondaryVariants.Count == 0)
@@ -890,7 +884,6 @@ public partial class ArchiveXlItemService
             _logger.Error($"Failed to open or create root entity {clothingItemData.RootEntityPath}");
             return;
         }
-
 
         var appearanceNames = clothingItemData.GetAppearanceNames();
         foreach (var itemName in appearanceNames)
