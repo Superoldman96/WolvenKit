@@ -18,7 +18,7 @@ For content changes edit `changelog/!unreleased.yaml` on the main branch and run
 :::
 
 ## Releasing
-To release for all platforms (Nuget Packages, Github, Nexusmods) manually trigger the release workflow. It will create a new tag, read the changelog from the previous step, build all assets and release them.
+To release for all platforms (Nuget Packages, GitHub, NexusMods), manually trigger the release workflow. It will create a new tag, read the changelog from the previous step, build all assets and release them.
 
 ## Post Release
 Bump the patch version by one (e.g., if the stable release was `8.17.2` bump it to `8.17.3`) for the nightly builds.
