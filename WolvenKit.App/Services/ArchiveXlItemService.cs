@@ -209,18 +209,21 @@ public partial class ArchiveXlItemService
     /// gets modder name from project or settings
     private string GetModderName()
     {
-        if (!string.IsNullOrEmpty(_projectManager.ActiveProject?.Author))
+        if (!string.IsNullOrEmpty(_projectManager.ActiveProject?.Author?.ToArchiveFileName()))
         {
             return _projectManager.ActiveProject.Author.ToArchiveFileName();
         }
 
-        if (string.IsNullOrEmpty(_settingsManager.ModderName))
+        var modderName = _settingsManager.ModderName?.ToArchiveFileName();
+
+
+        if (string.IsNullOrEmpty(modderName))
         {
             return "wolvenkit_user";
         }
 
 
-        return _settingsManager.ModderName.ToArchiveFileName();
+        return modderName;
     }
 
     public void CreateEquipmentItem(ArchiveXlClothingItem clothingItemData)
