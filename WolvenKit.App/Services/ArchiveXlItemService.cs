@@ -211,10 +211,16 @@ public partial class ArchiveXlItemService
     {
         if (!string.IsNullOrEmpty(_projectManager.ActiveProject?.Author))
         {
-            return _projectManager.ActiveProject.Author.ToArchiveFileName().Replace(" ", "_");
+            return _projectManager.ActiveProject.Author.ToArchiveFileName();
         }
 
-        return (_settingsManager.ModderName ?? "wolvenkit_user").ToArchiveFileName().Replace(" ", "_");
+        if (string.IsNullOrEmpty(_settingsManager.ModderName))
+        {
+            return "wolvenkit_user";
+        }
+
+
+        return _settingsManager.ModderName.ToArchiveFileName();
     }
 
     public void CreateEquipmentItem(ArchiveXlClothingItem clothingItemData)
@@ -1156,10 +1162,4 @@ public partial class ArchiveXlItemService
         var yaml = new YamlMappingNode() { { itemName, yamlData } };
         YamlHelper.RemoveInExistingFileAndAppend(yamlAbsPath, itemName, yaml, comment);
     }
-
-    /// <summary>
-    /// Regex for matching stuff like "an0_123" or "hh_" to strip prefixes from file names
-    /// </summary>
-    [GeneratedRegex(@"^([a-z]{1,2}[0-9]*_?[0-9]*_?)")]
-    private static partial Regex PrefixAndNumberRegex();
 }
